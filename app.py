@@ -1,48 +1,83 @@
 import streamlit as st
 import requests
 
-backend_url = st.secrets["sevice_base_url"].rstrip("/")
+BACKEND_URL = st.secrets["service_base_url"].rstrip("/")
 
-st.title("AI Content Generator")
+st.set_page_config(
+    page_title="AI Content Generator",
+    layout="wide"
+)
 
-topic = st.text_input("Topic")
-technology = st.text_input("Technology")
+st.title("🚀 AI Content Generator")
+
+st.write("Generate Blogs, LinkedIn Posts, Captions, Emails and more")
+
+topic = st.text_input(
+    "Enter Topic"
+)
+
+technology = st.selectbox(
+    "Select Technology",
+    [
+        "Python",
+        "React",
+        "MERN",
+        "NodeJS",
+        "FastAPI",
+        "AI",
+        "GenAI"
+    ]
+)
 
 content_type = st.selectbox(
     "Content Type",
-    ["Blog", "Article", "LinkedIn Post"]
+    [
+        "LinkedIn Post",
+        "Blog",
+        "Instagram Caption",
+        "Twitter Post",
+        "Email",
+        "YouTube Description"
+    ]
 )
 
 tone = st.selectbox(
     "Tone",
-    ["Professional", "Casual", "Technical"]
+    [
+        "Professional",
+        "Technical",
+        "Friendly",
+        "Casual",
+        "Marketing"
+    ]
 )
 
-if st.button("Generate Content"):
+generate = st.button("Generate Content")
 
-    try:
-        response = requests.post(
-            f"{backend_url}/generate",
-            params={
-                "topic": topic,
-                "technology": technology,
-                "content_type": content_type,
-                "tone": tone
-            },
-            timeout=60
-        )
+if generate:
 
-        st.write("Status Code:", response.status_code)
+    if topic == "":
+        st.warning("Please enter topic")
+    else:
 
-        if response.status_code == 200:
-            data = response.json()
+        with st.spinner("Generating Content..."):
+
+            response = requests.post(
+                f"{BACKEND_URL}/generate",
+                params={
+                    "topic": topic,
+                    "technology": technology,
+                    "content_type": content_type,
+                    "tone": tone
+                }
+            )
+
+            # result = response.json()
+            st.write("Status Code:", response.status_code)
+            st.write("Response Text:", response.json()["content"])
+
             st.success("Content Generated Successfully")
+
             st.subheader("Generated Content")
-            st.write(data["content"])
 
-        else:
-            st.error(f"Backend Error: {response.status_code}")
-            st.code(response.text)
-
-    except Exception as e:
-        st.error(str(e))
+           
