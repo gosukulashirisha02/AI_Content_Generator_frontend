@@ -1,72 +1,48 @@
 import streamlit as st
 import requests
 
-backend_url=st.secrets["sevice_base_url"].rstrip("/")
-st.set_page_config(
-    page_title="AI Content Generator",
-    layout="wide"
-)
-st.title("🚀AI Content Generator")
-st.write("Generate Blogs,LinkedIN posts,Captions,emails and more")
+backend_url = st.secrets["backend_url"]
 
-topic=st.text_input(
-    "Enter Topic"
-)
+st.title("AI Content Generator")
 
-technology=st.selectbox(
-    "Select Technology",
-    [
-        "python",
-        "React",
-        "MERN",
-        "NodeJS",
-        "FastAPI",
-        "AI",
-        "GenAI"
-    ]
+topic = st.text_input("Topic")
+technology = st.text_input("Technology")
+
+content_type = st.selectbox(
+    "Content Type",
+    ["Blog", "Article", "LinkedIn Post"]
 )
 
-content_type=st.selectbox(
-    "content type",
-    [
-        "LinkedIN post",
-        "Instagram Captions",
-        "Twitter post",
-        "Blogs",
-        "Email",
-        "YouTube Discription"
-    ]
-)
-tone=st.selectbox(
+tone = st.selectbox(
     "Tone",
-    [
-        "friendly",
-        "professional",
-        "casual",
-        "Technical",
-        "Business"
-    ]
+    ["Professional", "Casual", "Technical"]
 )
-generate=st.button("Generate Content")
 
-if generate:
-    
-    if topic=="":
-        st.warning("please enter topic")
-        
-    else:
-        with st.spinner("Generate Content..."):
-            response=requests.post(f"{backend_url}/generate",
+if st.button("Generate Content"):
+
+    try:
+        response = requests.post(
+            f"{backend_url}/generate",
             params={
-                "topic":topic,
-                "technology":technology,
-                "content_type":content_type,
-                "tone":tone
-             }
-            )
-           
-            st.write("Status Code:", response.status_code)
-            st.write("Raw Response:", response.text)
+                "topic": topic,
+                "technology": technology,
+                "content_type": content_type,
+                "tone": tone
+            },
+            timeout=60
+        )
+
+        st.write("Status Code:", response.status_code)
+
+        if response.status_code == 200:
+            data = response.json()
             st.success("Content Generated Successfully")
             st.subheader("Generated Content")
-    
+            st.write(data["content"])
+
+        else:
+            st.error(f"Backend Error: {response.status_code}")
+            st.code(response.text)
+
+    except Exception as e:
+        st.error(str(e))
