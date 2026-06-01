@@ -71,13 +71,16 @@ if generate:
                     "tone": tone
                 }
             )
-
-            # result = response.json()
             st.write("Status Code:", response.status_code)
-            st.write("Response Text:", response.json()["content"])
+            st.write("Raw Response:", response.text)
 
-            st.success("Content Generated Successfully")
+            if response.status_code == 200:
+                data = response.json()
+                st.write(data["content"])
+            else:
+                st.error("Backend returned an error")
+                
 
-            st.subheader("Generated Content")
+          
 
            
